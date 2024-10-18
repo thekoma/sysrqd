@@ -9,9 +9,7 @@ CFLAGS+=-W -Wall -Wextra \
 LDFLAGS+=-lcrypt
 
 SBINDIR=$(DESTDIR)/usr/sbin
-#MANDIR=$(DESTDIR)/usr/share/man/man1
 INSTALL = install
-#MAN=sysrqd.1
 
 $(BIN): $(O)
 	$(CC) -o $(BIN) $(O) $(LDFLAGS)
@@ -22,18 +20,15 @@ $(BIN).secret:
 		echo "Generated random password in $@"; \
 	fi
 
-install: $(BIN)
+install: $(BIN) $(BIN).secret
 	$(INSTALL) -d -m 755 $(SBINDIR)
 	$(INSTALL) -m 755 $(BIN) $(SBINDIR)
 	$(INSTALL) -m 644 $(BIN).service /etc/systemd/system/
-	$(INSTALL) -m 600 $(BIN).secret /etc/
-	systemctl enable $(BIN)
-	systemctl restart $(BIN)
-	#$(INSTALL) -d -m 755 $(MANDIR)
-	#$(INSTALL) -m 644 $(MAN) $(MANDIR)
+	test -f /etc/$(BIN).secret || $(INSTALL) -m 600 $(BIN).secret /etc/
+	systemctl enable --now $(BIN)
 
 clean:
-	rm -f *~ $(O) $(BIN)
+	rm -f *~ $(O) $(BIN) $(BIN).secret
 
 release: clean
 	mkdir ../$(BIN)-$(VERSION)
@@ -45,5 +40,11 @@ uninstall:
 	systemctl disable $(BIN)
 	systemctl stop $(BIN)
 	rm -f /etc/systemd/system/$(BIN).service
-	rm -f /etc/$(BIN).*
 	rm -f /$(SBINDIR)/$(BIN)
+
+purge:
+	systemctl disable $(BIN)
+	systemctl stop $(BIN)
+	rm -f /etc/systemd/system/$(BIN).service
+	rm -f /$(SBINDIR)/$(BIN)
+  rm -f /etc/$(BIN).*
