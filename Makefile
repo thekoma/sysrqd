@@ -14,7 +14,13 @@ INSTALL = install
 #MAN=sysrqd.1
 
 $(BIN): $(O)
-	$(CC) -o $(BIN) $(O) $(LDFLAGS) 
+	$(CC) -o $(BIN) $(O) $(LDFLAGS)
+
+$(BIN).secret:
+	@if [ ! -s "$@" ]; then \
+		head /dev/urandom | tr -dc A-Za-z0-9 | head -c 32 > $@; \
+		echo "Generated random password in $@"; \
+	fi
 
 install: $(BIN)
 	$(INSTALL) -d -m 755 $(SBINDIR)

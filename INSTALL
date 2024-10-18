@@ -6,7 +6,7 @@ Symple type:
 - Read the README file.
 
 - Create a password file:
-  echo "mypassword" > /etc/sysrqd.secret
+  head /dev/urandom | tr -dc A-Za-z0-9.\,-_+ | head -c 32 |tee > /etc/sysrqd.secret
   chmod 0600 /etc/sysrqd.secret
 
 - Optionnaly, create a bind file to bind to a specific IP
@@ -21,6 +21,6 @@ You can add this lines to /etc/services:
 sysrqd          4094/tcp   # sysrq daemon
 sysrqd          4094/udp   # sysrq daemon
 
-% make uninstall 
+% make uninstall
 
 - Removes installed files, and disabled systemd service for it
